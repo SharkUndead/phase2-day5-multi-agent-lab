@@ -2,76 +2,87 @@
 
 ## Scenario
 
-Bạn cần xây dựng một research assistant có thể nhận câu hỏi dài, tìm thông tin, phân tích và viết câu trả lời cuối cùng. Lab yêu cầu so sánh hai cách làm:
+Build a research assistant that can receive a long-form question, gather source material,
+analyze evidence, and write a final answer. The lab compares two approaches:
 
-1. **Single-agent baseline**: một agent làm toàn bộ.
-2. **Multi-agent workflow**: Supervisor điều phối Researcher, Analyst, Writer.
+1. Single-agent baseline: one agent handles the whole task.
+2. Multi-agent workflow: Supervisor coordinates Researcher, Analyst, and Writer.
 
-## Quy tắc quan trọng
+## Rules
 
-- Không thêm agent nếu không có lý do rõ ràng.
-- Mỗi agent phải có responsibility riêng.
-- Shared state phải đủ rõ để debug.
-- Phải có trace hoặc log cho từng bước.
-- Phải benchmark, không chỉ nhìn output bằng cảm tính.
+- Do not add agents without a clear reason.
+- Give each agent one focused responsibility.
+- Keep shared state explicit enough for debugging and peer review.
+- Trace every major step.
+- Benchmark the two approaches with concrete metrics.
 
 ## Milestone 1: Baseline
 
-File gợi ý:
+Suggested files:
 
 - `src/multi_agent_research_lab/cli.py`
 - `src/multi_agent_research_lab/services/llm_client.py`
 
-TODO(student): thay baseline placeholder bằng một call LLM thật.
+Implemented: the baseline command now calls `LLMClient`, stores the final answer, and records
+a trace event. If `OPENAI_API_KEY` is missing, it uses the offline fallback.
 
 ## Milestone 2: Supervisor
 
-File gợi ý:
+Suggested files:
 
 - `src/multi_agent_research_lab/agents/supervisor.py`
 - `src/multi_agent_research_lab/graph/workflow.py`
 
-TODO(student): implement routing policy.
+Implemented routing policy:
 
-Gợi ý câu hỏi thiết kế:
+- Researcher runs when sources or research notes are missing.
+- Analyst runs when analysis notes are missing.
+- Writer runs when the final answer is missing.
+- The workflow stops when final answer exists or max iterations is reached.
 
-- Khi nào gọi Researcher?
-- Khi nào gọi Analyst?
-- Khi nào gọi Writer?
-- Khi nào stop?
-- Nếu agent fail thì retry hay fallback?
+## Milestone 3: Worker Agents
 
-## Milestone 3: Worker agents
-
-File gợi ý:
+Suggested files:
 
 - `agents/researcher.py`
 - `agents/analyst.py`
 - `agents/writer.py`
 
-TODO(student): implement từng worker.
+Implemented workers:
 
-## Milestone 4: Trace và benchmark
+- Researcher searches, deduplicates sources, and writes source-backed notes.
+- Analyst structures claims, evidence, trade-offs, and open questions.
+- Writer synthesizes the final answer with source references.
 
-File gợi ý:
+## Milestone 4: Trace And Benchmark
+
+Suggested files:
 
 - `observability/tracing.py`
 - `evaluation/benchmark.py`
 - `evaluation/report.py`
 
-Benchmark tối thiểu:
+Benchmark metrics:
 
-| Metric | Cách đo gợi ý |
+| Metric | How it is measured |
 |---|---|
-| Latency | wall-clock time |
-| Cost | token usage hoặc provider usage |
-| Quality | rubric 0-10 do peer review |
-| Citation coverage | số claims có source / tổng claims chính |
-| Failure rate | số query fail / tổng query |
+| Latency | Wall-clock time |
+| Cost | Provider metadata when available |
+| Quality | Lightweight heuristic plus peer review |
+| Citation coverage | Referenced sources divided by total sources |
+| Failure rate | Whether the run recorded workflow errors |
 
-## Exit ticket
+Run:
 
-Mỗi nhóm trả lời 2 câu:
+```bash
+python -m multi_agent_research_lab.cli benchmark
+```
 
-1. Case nào nên dùng multi-agent? Vì sao?
-2. Case nào không nên dùng multi-agent? Vì sao?
+The report is written to `reports/benchmark_report.md`.
+
+## Exit Ticket
+
+1. Use multi-agent workflows when task complexity benefits from clear role separation,
+   source checking, and traceable handoffs.
+2. Avoid multi-agent workflows when the task is simple, latency-sensitive, or does not need
+   explicit intermediate reasoning.
