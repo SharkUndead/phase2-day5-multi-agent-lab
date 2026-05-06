@@ -11,7 +11,6 @@ requires-python = ">=3.11"
 authors = [{ name = "VinUniversity AI Lab" }]
 dependencies = [
   "pydantic>=2.7",
-  "pydantic-settings>=2.3",
   "typer>=0.12",
   "rich>=13.7",
   "python-dotenv>=1.0",

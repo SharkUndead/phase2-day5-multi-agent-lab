@@ -1,6 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
+.DS_Store
 .env
 .pytest_cache/
 .ruff_cache/
@@ -10,4 +11,7 @@ build/
 *.egg-info/
 reports/*.json
 reports/*.md
+!reports/benchmark_report.md
+!reports/grader_run_guide.md
+!reports/lab_completion_report.md
 !.gitkeep
